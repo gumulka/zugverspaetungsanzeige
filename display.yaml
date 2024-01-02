@@ -1,0 +1,237 @@
+esphome:
+  name: home-display
+
+esp32:
+  board: esp32dev
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret ha_api_pw
+
+ota:
+  password: !secret ota_pw
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_pw
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/gumulka/esphome
+      ref: my_waveshare_experiment
+    components: [ "waveshare_epaper" ]
+
+binary_sensor:
+  - platform: homeassistant
+    id: orchids
+    entity_id: binary_sensor.orchideen_giessen
+    internal: true
+    on_state:
+      - component.update: my_display
+  - platform: homeassistant
+    id: bedsheets
+    entity_id: binary_sensor.bettwasche_wechseln
+    internal: true
+    on_state:
+      - component.update: my_display
+  - platform: homeassistant
+    id: garbage
+    entity_id: input_boolean.garbage
+    internal: true
+    on_state:
+      - component.update: my_display
+  - platform: homeassistant
+    id: dusting
+    entity_id: binary_sensor.wohnung_saugen
+    internal: true
+    on_state:
+      - component.update: my_display
+
+text_sensor:
+  - platform: homeassistant
+    id: calendar_start_time
+    entity_id: calendar.privat
+    attribute: start_time
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: calendar_message
+    entity_id: calendar.privat
+    attribute: message
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: current_weather
+    entity_id: weather.home
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: next_train
+    entity_id: sensor.nachster_zug
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: next_train_extra
+    entity_id: sensor.nachster_zug_extras
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: next_next_train
+    entity_id: sensor.ubernachster_zug
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: next_next_train_extra
+    entity_id: sensor.ubernachster_zug_extras
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: next_next_next_train
+    entity_id: sensor.drittnachster_zug
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: next_next_next_train_extra
+    entity_id: sensor.drittnachster_zug_extras
+    on_value:
+      then:
+        - delay: 2s
+        - component.update: my_display
+
+font:
+  - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
+    id: haupttext
+    size: 38
+    glyphs: "!\"/%()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ"
+  - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
+    id: wetter_text
+    size: 30
+    glyphs: "!\"/%()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ"
+  - file: 'gfonts://Material+Symbols+Outlined'
+    id: icon_font
+    size: 150
+    glyphs: ["\U0000f176", "\U0000e2cd", "\U0000f172", "\U0000e2bd", "\U0000f157", "\U0000eb8b", "\U0000f159"]
+
+spi:
+  clk_pin: GPIO13
+  mosi_pin: GPIO14
+
+# 640x384
+display:
+  - platform: waveshare_epaper
+    id: my_display
+    cs_pin: GPIO15
+    dc_pin: GPIO27
+    busy_pin: GPIO25
+    reset_pin: GPIO26
+    model: 7.50in-bc
+    update_interval: 3600s
+    lambda: |-
+      auto white = Color(0, 0, 0);
+      auto black = Color(255, 255, 255);
+      auto red = Color(255, 0, 0);
+
+
+      // CALENDAR
+      std::string start_zeit(id(calendar_start_time).state);
+      if(start_zeit.length() > 16) {
+        std::string dispay_zeit(start_zeit.substr(8,2) + "." + start_zeit.substr(5,2) + "." + start_zeit.substr(10,6));
+        it.print(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, dispay_zeit.c_str());
+      }
+      it.print(20, 60, id(haupttext), black, TextAlign::TOP_LEFT, id(calendar_message).state.c_str());
+
+
+      // ALARMS
+      int start = 120;
+      if (id(orchids).state) {
+        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Orchideen wässern");
+        start = start + 40;
+      }
+      if (id(bedsheets).state) {
+        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Bettwäsche wechseln");
+        start = start + 40;
+      }
+      if (id(garbage).state) {
+        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Müll rausbringen");
+        start = start + 40;
+      }
+      if (id(dusting).state) {
+        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Wohnung saugen");
+        start = start + 40;
+      }
+
+      int throwaway, width;
+
+      // BAHNANZEIGE
+      it.filled_rectangle(0, 220, 640, 164, white);
+      it.print(20, 220, id(haupttext), black, TextAlign::TOP_LEFT, id(next_train).state.c_str());
+      if(id(next_train_extra).state == "Zug fällt aus") {
+        id(haupttext).measure(id(next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+        it.filled_rectangle(20, 238, width, 7, red);
+      } else if(!id(next_train_extra).state.empty()) {
+        it.filled_rectangle(15, 220, 120, 45, red);
+        it.print(20, 220, id(haupttext), white, TextAlign::TOP_LEFT, id(next_train_extra).state.c_str());
+      }
+      it.print(20, 270, id(haupttext), black, TextAlign::TOP_LEFT, id(next_next_train).state.c_str());
+      if(id(next_next_train_extra).state == "Zug fällt aus") {
+        id(haupttext).measure(id(next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+        it.filled_rectangle(20, 288, width, 7, red);
+      } else if(!id(next_next_train_extra).state.empty()) {
+        it.filled_rectangle(15, 270, 120, 45, red);
+        it.print(20, 270, id(haupttext), white, TextAlign::TOP_LEFT, id(next_next_train_extra).state.c_str());
+      }
+      it.print(20, 320, id(haupttext), black, TextAlign::TOP_LEFT, id(next_next_next_train).state.c_str());
+      if(id(next_next_next_train_extra).state == "Zug fällt aus") {
+        id(haupttext).measure(id(next_next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+        it.filled_rectangle(20, 338, width, 7, red);
+      } else if(!id(next_next_next_train_extra).state.empty()) {
+        it.filled_rectangle(15, 320, 120, 45, red);
+        it.print(20, 320, id(haupttext), white, TextAlign::TOP_LEFT, id(next_next_next_train_extra).state.c_str());
+      }
+
+
+      // WEATHER SYMBOL
+      it.filled_rectangle(440, 0, 200, 200, white);
+      std::string weather_text(id(current_weather).state);
+      if(weather_text.find("rainy") != std::string::npos ) {
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000f176");
+      } else
+      if(weather_text.find("snowy") != std::string::npos ) {
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000e2cd");
+      } else
+      if(weather_text.find("partly cloudy") != std::string::npos ) {
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000f172");
+      } else
+      if(weather_text.find("cloudy") != std::string::npos ) {
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000e2bd");
+      } else
+      if(weather_text.find("sunny") != std::string::npos ) {
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000f157");
+      } else
+      if(weather_text.find("night") != std::string::npos ) {
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000f159");
+      } else {
+        // question mark
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000eb8b");
+      };
+      it.print(540, 160, id(wetter_text), black, TextAlign::TOP_CENTER, weather_text.c_str());
