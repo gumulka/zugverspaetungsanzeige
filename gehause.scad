@@ -1,14 +1,3 @@
-
-frontside();
-
-$fn = 40;
-
-translate([ 0, -3, -1.5 ]) waveshare_7in5(false);
-
-translate([ 13, -20, -5 ]) rotate([ 0, 180, 90 ]) waveshare_esp32_driver(false);
-
-translate([ 0, 0, 1 ]) backplate();
-
 module backplate() {
   difference() {
     union() {
@@ -113,59 +102,4 @@ module edge(size = 10, width = 5) {
   translate([ -width / 2, -size, -size ]) rotate([ 90, 0, 90 ])
       linear_extrude(width)
           polygon(points = [ [ 0, 0 ], [ size, 0 ], [ size, size ] ]);
-}
-
-module waveshare_7in5(straight = true) {
-  color("grey") translate([ -85, -56, 0 ]) cube([ 170, 112, 1.5 ]);
-  color("white") translate([ -79, -44, 0.01 ]) cube([ 158, 94, 1.5 ]);
-
-  if (straight) {
-    color("gold") translate([ -12, -70, 0 ]) cube([ 24, 14, 1 ]);
-    color("gold") translate([ -7, -80, 0 ]) cube([ 14, 10, 1 ]);
-  } else {
-    color("gold") translate([ 12, -56, -3 ]) rotate([ 0, 90, 180 ])
-        rotate_extrude(angle = 180) translate([ 3, 0, 0 ]) square([ 1, 24 ]);
-    color("gold") translate([ -7, -56, -7 ]) cube([ 14, 10, 1 ]);
-  }
-}
-
-module waveshare_esp32_driver(with_pinheader = true) {
-  // board
-  color("blue") cube([ 30, 49, 2 ]);
-  // top side
-  translate([ 6, 23, 2 ]) esp32();
-  color("white") translate([ 24, 5, 2 ]) cube([ 5, 16, 2 ]);
-  color("black") translate([ 1, 9, 2 ]) cube([ 4, 6, 2.5 ]);
-  color("silver") translate([ 11, -1, 2 ]) cube([ 8, 6, 2.5 ]);
-  translate([ 5, 0, 2 ]) button();
-  translate([ 20, 0, 2 ]) button();
-  // bottom side
-  color("black") translate([ 8, 15.5, -3 ]) cube([ 4, 4, 3 ]);
-  if (with_pinheader) {
-    translate([ 3.5, 0, 0 ]) rotate([ 0, 180, 0 ]) smd_pinheader();
-    translate([ 26, 0, 0 ]) rotate([ 0, 180, 0 ]) smd_pinheader();
-  }
-}
-
-module smd_pinheader() {
-  for (i = [0:18]) {
-    translate([ 0, 1.27 + i * 2.54, 0 ]) rotate([ 0, 0, i * 180 ]) smd_pin();
-  }
-}
-
-module smd_pin() {
-  color("yellow") translate([ 0, 0, 2 ]) cube(2.54, center = true);
-  color("gold") translate([ 0, 0, 5 ]) cube([ 0.7, 0.7, 10 ], center = true);
-  color("gold") translate([ 1.5, 0, 0.35 ])
-      cube([ 3, 0.7, 0.7 ], center = true);
-}
-
-module button() {
-  color("silver") cube([ 4, 3, 1.5 ]);
-  color("black") translate([ 2, 1.5, 1.5 ]) cylinder(1, 1, center = true);
-}
-
-module esp32() {
-  color("black") cube([ 18, 26, 1 ]);
-  color("silver") translate([ 1, 1, 1 ]) cube([ 16, 18, 3 ]);
 }

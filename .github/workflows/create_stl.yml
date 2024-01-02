@@ -1,0 +1,31 @@
+name: STL file creation
+run-name: Create STL files from scad libraries
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: create temporary files
+        run: |
+          echo "include <gehause.scad>" > vorderseite.scad
+          echo "\$fn = 40;" >> vorderseite.scad
+          echo "rotate([180,0,0]) frontside();" >> vorderseite.scad
+          echo "include <gehause.scad>" > ruckseite.scad
+          echo "\$fn = 40;" >> ruckseite.scad
+          echo "backplate();" >> ruckseite.scad
+      - name: Build frontplate
+        uses: flat35hd99/openscad-actions@v1.3
+        with:
+          scad_file: vorderseite.scad
+          output_file: vorderseite.stl
+      - name: Build backplate
+        uses: flat35hd99/openscad-actions@v1.3
+        with:
+          scad_file: ruckseite.scad
+          output_file: ruckseite.stl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stl-files
+          path: ./*.stl
