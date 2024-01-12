@@ -130,7 +130,7 @@ font:
   - file: 'gfonts://Material+Symbols+Outlined'
     id: icon_font
     size: 150
-    glyphs: ["\U0000f176", "\U0000e2cd", "\U0000f172", "\U0000e2bd", "\U0000f157", "\U0000eb8b", "\U0000f159"]
+    glyphs: ["\U0000f176", "\U0000e2cd", "\U0000f172", "\U0000e2bd", "\U0000f157", "\U0000eb8b", "\U0000f159", "\U0000e818"]
 
 spi:
   clk_pin: GPIO13
@@ -230,6 +230,9 @@ display:
       } else
       if(weather_text.find("night") != std::string::npos ) {
         it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000f159");
+      } else
+      if(weather_text.find("fog") != std::string::npos ) {
+        it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000e818");
       } else {
         // question mark
         it.print(540, 0, id(icon_font), black, TextAlign::TOP_CENTER, "\U0000eb8b");
