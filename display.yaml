@@ -18,6 +18,10 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_pw
 
+time:
+  - platform: sntp
+    id: sntp_time
+
 external_components:
   - source:
       type: git
@@ -155,8 +159,21 @@ display:
       // CALENDAR
       std::string start_zeit(id(calendar_start_time).state);
       if(start_zeit.length() > 16) {
-        std::string dispay_zeit(start_zeit.substr(8,2) + "." + start_zeit.substr(5,2) + "." + start_zeit.substr(10,6));
-        it.print(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, dispay_zeit.c_str());
+        struct tm tm;
+        if(strptime(start_zeit.c_str(), "%Y-%m-%d %H:%M:%S", &tm)==NULL) {
+          std::string display_zeit(start_zeit.substr(8,2) + "." + start_zeit.substr(5,2) + "." + start_zeit.substr(10,6));
+          it.print(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, display_zeit.c_str());
+        } else {
+          auto event_time = ESPTime::from_c_tm(&tm, NULL);
+          auto curr_time = id(sntp_time).now();
+          if(curr_time.year == event_time.year && curr_time.day_of_year == event_time.day_of_year) {
+            it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Heute %H:%M Uhr", event_time);
+          } else if(curr_time.year == event_time.year && curr_time.day_of_year + 1 == event_time.day_of_year) {
+            it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Morgen %H:%M Uhr", event_time);
+          } else {
+            it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "%A %H:%M Uhr", event_time);
+          }
+        }
       }
       it.print(20, 60, id(haupttext), black, TextAlign::TOP_LEFT, id(calendar_message).state.c_str());
 
