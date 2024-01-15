@@ -18,6 +18,9 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_pw
 
+status_led:
+  pin: GPIO2
+
 time:
   - platform: sntp
     id: sntp_time
@@ -54,6 +57,10 @@ binary_sensor:
     internal: true
     on_state:
       - component.update: my_display
+  - platform: homeassistant
+    id: calendar_all_day
+    entity_id: calendar.privat
+    attribute: all_day
 
 text_sensor:
   - platform: homeassistant
@@ -152,7 +159,8 @@ display:
     update_interval: 3600s
     lambda: |-
       auto white = Color(0, 0, 0);
-      auto black = Color(255, 255, 255);
+      auto black = Color(255, 0, 0);
+      // auto black = Color(255, 255, 255);
       auto red = Color(255, 0, 0);
 
 
@@ -167,11 +175,23 @@ display:
           auto event_time = ESPTime::from_c_tm(&tm, NULL);
           auto curr_time = id(sntp_time).now();
           if(curr_time.year == event_time.year && curr_time.day_of_year == event_time.day_of_year) {
-            it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Heute %H:%M Uhr", event_time);
+            if (id(calendar_all_day).state) {
+              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Heute", event_time);
+            } else {
+              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Heute %H:%M Uhr", event_time);
+            }
           } else if(curr_time.year == event_time.year && curr_time.day_of_year + 1 == event_time.day_of_year) {
-            it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Morgen %H:%M Uhr", event_time);
+            if (id(calendar_all_day).state) {
+              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Morgen", event_time);
+            } else {
+              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Morgen %H:%M Uhr", event_time);
+            }
           } else {
-            it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "%A %H:%M Uhr", event_time);
+            if (id(calendar_all_day).state) {
+              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "%A", event_time);
+            } else {
+              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "%A %H:%M Uhr", event_time);
+            }
           }
         }
       }
