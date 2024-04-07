@@ -34,30 +34,6 @@ external_components:
 
 binary_sensor:
   - platform: homeassistant
-    id: orchids
-    entity_id: binary_sensor.orchideen_giessen
-    internal: true
-    on_state:
-      - component.update: my_display
-  - platform: homeassistant
-    id: bedsheets
-    entity_id: binary_sensor.bettwasche_wechseln
-    internal: true
-    on_state:
-      - component.update: my_display
-  - platform: homeassistant
-    id: garbage
-    entity_id: input_boolean.garbage
-    internal: true
-    on_state:
-      - component.update: my_display
-  - platform: homeassistant
-    id: dusting
-    entity_id: binary_sensor.wohnung_saugen
-    internal: true
-    on_state:
-      - component.update: my_display
-  - platform: homeassistant
     id: calendar_all_day
     entity_id: calendar.privat
     attribute: all_day
@@ -200,21 +176,17 @@ display:
 
       // ALARMS
       int start = 120;
-      if (id(orchids).state) {
-        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Orchideen wässern");
-        start = start + 40;
-      }
-      if (id(bedsheets).state) {
-        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Bettwäsche wechseln");
-        start = start + 40;
-      }
-      if (id(garbage).state) {
-        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Müll rausbringen");
-        start = start + 40;
-      }
-      if (id(dusting).state) {
-        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, "Wohnung saugen");
-        start = start + 40;
+      std::string todo_list(id(todolist).state);
+      if(todo_list.length() > 0) {
+        size_t pos = 0;
+        std::string token;
+        while ((pos = todo_list.find('\n')) != std::string::npos) {
+            token = todo_list.substr(0, pos);
+            it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, token.c_str() );
+            start = start + 40;
+            todo_list.erase(0, pos + 1);
+        }
+        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, todo_list.c_str() );
       }
 
       int throwaway, width;
