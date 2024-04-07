@@ -40,6 +40,12 @@ binary_sensor:
 
 text_sensor:
   - platform: homeassistant
+    id: todolist
+    entity_id: input_text.to_do_list_items
+    on_value:
+      then:
+        - component.update: my_display
+  - platform: homeassistant
     id: calendar_start_time
     entity_id: calendar.privat
     attribute: start_time
@@ -189,7 +195,7 @@ display:
       // BAHNANZEIGE
       it.filled_rectangle(0, 220, 640, 164, white);
       it.print(20, 220, id(haupttext), black, TextAlign::TOP_LEFT, id(next_train).state.c_str());
-      if(id(next_train_extra).state == "Zug fällt aus") {
+      if(id(next_train_extra).state == "Fahrt fällt aus") {
         id(haupttext).measure(id(next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 238, width, 7, red);
       } else if(!id(next_train_extra).state.empty()) {
@@ -197,7 +203,7 @@ display:
         it.print(20, 220, id(haupttext), white, TextAlign::TOP_LEFT, id(next_train_extra).state.c_str());
       }
       it.print(20, 270, id(haupttext), black, TextAlign::TOP_LEFT, id(next_next_train).state.c_str());
-      if(id(next_next_train_extra).state == "Zug fällt aus") {
+      if(id(next_next_train_extra).state == "Fahrt fällt aus") {
         id(haupttext).measure(id(next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 288, width, 7, red);
       } else if(!id(next_next_train_extra).state.empty()) {
@@ -205,7 +211,7 @@ display:
         it.print(20, 270, id(haupttext), white, TextAlign::TOP_LEFT, id(next_next_train_extra).state.c_str());
       }
       it.print(20, 320, id(haupttext), black, TextAlign::TOP_LEFT, id(next_next_next_train).state.c_str());
-      if(id(next_next_next_train_extra).state == "Zug fällt aus") {
+      if(id(next_next_next_train_extra).state == "Fahrt fällt aus") {
         id(haupttext).measure(id(next_next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 338, width, 7, red);
       } else if(!id(next_next_next_train_extra).state.empty()) {
