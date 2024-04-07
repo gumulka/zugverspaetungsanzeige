@@ -113,8 +113,12 @@ text_sensor:
 
 font:
   - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
-    id: haupttext
+    id: train_font
     size: 38
+    glyphs: "!\"/%()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ"
+  - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
+    id: date_font
+    size: 36
     glyphs: "!\"/%()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ\U00002192"
   - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
     id: wetter_text
@@ -152,7 +156,7 @@ display:
         struct tm tm;
         if(strptime(start_zeit.c_str(), "%Y-%m-%d %H:%M:%S", &tm)==NULL) {
           std::string display_zeit(start_zeit.substr(8,2) + "." + start_zeit.substr(5,2) + "." + start_zeit.substr(10,6));
-          it.print(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, display_zeit.c_str());
+          it.print(20, 20, id(date_font), black, TextAlign::TOP_LEFT, display_zeit.c_str());
         } else {
           auto event_time = ESPTime::from_c_tm(&tm, NULL);
           auto curr_time = id(sntp_time).now();
@@ -169,54 +173,54 @@ display:
           if (!id(calendar_all_day).state) {
             timestring += " %H:%M Uhr";
           }
-          it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, timestring.c_str(), event_time);
+          it.strftime(20, 20, id(date_font), black, TextAlign::TOP_LEFT, timestring.c_str(), event_time);
         }
       }
-      it.print(20, 60, id(haupttext), black, TextAlign::TOP_LEFT, id(calendar_message).state.c_str());
+      it.print(20, 60, id(date_font), black, TextAlign::TOP_LEFT, id(calendar_message).state.c_str());
 
 
       // ALARMS
-      int start = 120;
+      int start = 107;
       std::string todo_list(id(todolist).state);
       if(todo_list.length() > 0) {
         size_t pos = 0;
         std::string token;
         while ((pos = todo_list.find('\n')) != std::string::npos) {
             token = todo_list.substr(0, pos);
-            it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, token.c_str() );
-            start = start + 40;
+            it.print(20, start, id(wetter_text), red, TextAlign::TOP_LEFT, token.c_str() );
+            start = start + 35;
             todo_list.erase(0, pos + 1);
         }
-        it.print(20, start, id(haupttext), red, TextAlign::TOP_LEFT, todo_list.c_str() );
+        it.print(20, start, id(wetter_text), red, TextAlign::TOP_LEFT, todo_list.c_str() );
       }
 
       int throwaway, width;
 
       // BAHNANZEIGE
       it.filled_rectangle(0, 220, 640, 164, white);
-      it.print(20, 220, id(haupttext), black, TextAlign::TOP_LEFT, id(next_train).state.c_str());
+      it.print(20, 220, id(train_font), black, TextAlign::TOP_LEFT, id(next_train).state.c_str());
       if(id(next_train_extra).state == "Fahrt fällt aus") {
-        id(haupttext).measure(id(next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+        id(train_font).measure(id(next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 238, width, 7, red);
       } else if(!id(next_train_extra).state.empty()) {
         it.filled_rectangle(15, 220, 120, 45, red);
-        it.print(20, 220, id(haupttext), white, TextAlign::TOP_LEFT, id(next_train_extra).state.c_str());
+        it.print(20, 220, id(train_font), white, TextAlign::TOP_LEFT, id(next_train_extra).state.c_str());
       }
-      it.print(20, 270, id(haupttext), black, TextAlign::TOP_LEFT, id(next_next_train).state.c_str());
+      it.print(20, 270, id(train_font), black, TextAlign::TOP_LEFT, id(next_next_train).state.c_str());
       if(id(next_next_train_extra).state == "Fahrt fällt aus") {
-        id(haupttext).measure(id(next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+        id(train_font).measure(id(next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 288, width, 7, red);
       } else if(!id(next_next_train_extra).state.empty()) {
         it.filled_rectangle(15, 270, 120, 45, red);
-        it.print(20, 270, id(haupttext), white, TextAlign::TOP_LEFT, id(next_next_train_extra).state.c_str());
+        it.print(20, 270, id(train_font), white, TextAlign::TOP_LEFT, id(next_next_train_extra).state.c_str());
       }
-      it.print(20, 320, id(haupttext), black, TextAlign::TOP_LEFT, id(next_next_next_train).state.c_str());
+      it.print(20, 320, id(train_font), black, TextAlign::TOP_LEFT, id(next_next_next_train).state.c_str());
       if(id(next_next_next_train_extra).state == "Fahrt fällt aus") {
-        id(haupttext).measure(id(next_next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+        id(train_font).measure(id(next_next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 338, width, 7, red);
       } else if(!id(next_next_next_train_extra).state.empty()) {
         it.filled_rectangle(15, 320, 120, 45, red);
-        it.print(20, 320, id(haupttext), white, TextAlign::TOP_LEFT, id(next_next_next_train_extra).state.c_str());
+        it.print(20, 320, id(train_font), white, TextAlign::TOP_LEFT, id(next_next_next_train_extra).state.c_str());
       }
 
 
