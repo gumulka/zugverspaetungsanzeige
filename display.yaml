@@ -109,7 +109,7 @@ font:
   - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
     id: haupttext
     size: 38
-    glyphs: "!\"/%()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ"
+    glyphs: "!\"/%()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ\U00002192"
   - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
     id: wetter_text
     size: 30
@@ -150,25 +150,20 @@ display:
         } else {
           auto event_time = ESPTime::from_c_tm(&tm, NULL);
           auto curr_time = id(sntp_time).now();
+          std::string timestring;
           if(curr_time.year == event_time.year && curr_time.day_of_year == event_time.day_of_year) {
-            if (id(calendar_all_day).state) {
-              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Heute", event_time);
-            } else {
-              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Heute %H:%M Uhr", event_time);
-            }
+              timestring = "Heute";
           } else if(curr_time.year == event_time.year && curr_time.day_of_year + 1 == event_time.day_of_year) {
-            if (id(calendar_all_day).state) {
-              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Morgen", event_time);
-            } else {
-              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "Morgen %H:%M Uhr", event_time);
-            }
+              timestring = "Morgen";
+          } else if(curr_time.year == event_time.year && curr_time.day_of_year + 2 == event_time.day_of_year) {
+              timestring = "Übermorgen";
           } else {
-            if (id(calendar_all_day).state) {
-              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "%A", event_time);
-            } else {
-              it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, "%A %H:%M Uhr", event_time);
-            }
+            timestring = "%A";
           }
+          if (!id(calendar_all_day).state) {
+            timestring += " %H:%M Uhr";
+          }
+          it.strftime(20, 20, id(haupttext), black, TextAlign::TOP_LEFT, timestring.c_str(), event_time);
         }
       }
       it.print(20, 60, id(haupttext), black, TextAlign::TOP_LEFT, id(calendar_message).state.c_str());
