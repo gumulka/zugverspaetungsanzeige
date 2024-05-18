@@ -199,26 +199,26 @@ display:
       // BAHNANZEIGE
       it.filled_rectangle(0, 220, 640, 164, white);
       it.print(20, 220, id(train_font), black, TextAlign::TOP_LEFT, id(next_train).state.c_str());
-      if(id(next_train_extra).state == "Fahrt fällt aus") {
+      if(id(next_train_extra).state.find("ällt aus") != std::string::npos) {
         id(train_font).measure(id(next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 238, width, 7, red);
-      } else if(!id(next_train_extra).state.empty()) {
+      } else if(!id(next_train_extra).state.empty() && id(next_train).state.rfind(id(next_train_extra).state,0) == std::string::npos) {
         it.filled_rectangle(15, 220, 120, 45, red);
         it.print(20, 220, id(train_font), white, TextAlign::TOP_LEFT, id(next_train_extra).state.c_str());
       }
       it.print(20, 270, id(train_font), black, TextAlign::TOP_LEFT, id(next_next_train).state.c_str());
-      if(id(next_next_train_extra).state == "Fahrt fällt aus") {
+      if(id(next_next_train_extra).state.find("ällt aus") != std::string::npos) {
         id(train_font).measure(id(next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 288, width, 7, red);
-      } else if(!id(next_next_train_extra).state.empty()) {
+      } else if(!id(next_next_train_extra).state.empty() && id(next_next_train).state.rfind(id(next_next_train_extra).state,0) == std::string::npos) {
         it.filled_rectangle(15, 270, 120, 45, red);
         it.print(20, 270, id(train_font), white, TextAlign::TOP_LEFT, id(next_next_train_extra).state.c_str());
       }
       it.print(20, 320, id(train_font), black, TextAlign::TOP_LEFT, id(next_next_next_train).state.c_str());
-      if(id(next_next_next_train_extra).state == "Fahrt fällt aus") {
+      if(id(next_next_next_train_extra).state.find("ällt aus") != std::string::npos) {
         id(train_font).measure(id(next_next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 338, width, 7, red);
-      } else if(!id(next_next_next_train_extra).state.empty()) {
+      } else if(!id(next_next_next_train_extra).state.empty() && id(next_next_next_train).state.rfind(id(next_next_next_train_extra).state,0) == std::string::npos) {
         it.filled_rectangle(15, 320, 120, 45, red);
         it.print(20, 320, id(train_font), white, TextAlign::TOP_LEFT, id(next_next_next_train_extra).state.c_str());
       }
