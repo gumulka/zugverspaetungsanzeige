@@ -3,42 +3,20 @@
 Ich wollte neben meiner Haustür eine Anzeige haben, die mich über aktuelle
 Zugverspätungen informiert.
 
-In Home-Assistant kann man die Abfahrt der nächsten drei Züge integrieren
-mit dem folgenden snippet:
+Anfangs habe ich die Daten dazu direkt von der API hinter bahnhof.de abgeholt
+und mittels der REST-schnittstelle in home-assistant rein gehackt.
+Mitlerweile habe ich dazu einen home-assistant integration geschrieben, weil
+die API sich ständig ändert und es irgendwie nervig war mit den REST-Sachen umzugehen.
 
-```yaml
-rest:
- -  resource: https://www.bahnhof.de/api/boards/departures?evaNumbers=8000152&filterTransports=REGIONAL_TRAIN&filterTransports=CITY_TRAIN&stationCategory=5&locale=de
-    scan_interval: 300
-    sensor:
-      - name: "Nächster Zug"
-        value_template: "{{ value_json[0][0]['timeSchedule'] | as_timestamp |timestamp_custom('%H:%M') }} {{ value_json[0][0]['destination']['name'] }}"
-        unique_id: "nachster_zug"
-      - name: "Nächster Zug Extras"
-        value_template: "{% if value_json[0][0].timeDelayed -%}{{ value_json[0][0]['timeDelayed'] | as_timestamp |timestamp_custom('%H:%M') }} {%- endif %}{% if value_json[0][0]['messages']['cancelation'] -%}{{ value_json[0][0]['messages']['cancelation'][0]['text'] }}{%- endif %}"
-        unique_id: "nachster_zug_extra"
-      - name: "Übernächster Zug"
-        value_template: "{{ value_json[1][0]['timeSchedule'] | as_timestamp |timestamp_custom('%H:%M') }} {{ value_json[1][0]['destination']['name'] }}"
-        unique_id: "ubernachster_zug"
-      - name: "Übernächster Zug Extras"
-        value_template: "{% if value_json[1][0].timeDelayed -%}{{ value_json[1][0]['timeDelayed'] | as_timestamp |timestamp_custom('%H:%M') }} {%- endif %}{% if value_json[1][0]['messages']['cancelation'] -%}{{ value_json[1][0]['messages']['cancelation'][0]['text'] }}{%- endif %}"
-        unique_id: "ubernachster_zug_extra"
-      - name: "Drittnächster Zug"
-        value_template: "{{ value_json[2][0]['timeSchedule'] | as_timestamp |timestamp_custom('%H:%M') }} {{ value_json[2][0]['destination']['name'] }}"
-        unique_id: "drittnachster_zug"
-      - name: "Drittnächster Zug Extras"
-        value_template: "{% if value_json[2][0].timeDelayed -%}{{ value_json[2][0]['timeDelayed'] | as_timestamp |timestamp_custom('%H:%M') }} {%- endif %}{% if value_json[2][0]['messages']['cancelation'] -%}{{ value_json[2][0]['messages']['cancelation'][0]['text'] }}{%- endif %}"
-        unique_id: "drittnachster_zug_extra"
+Die Integration fragt nach dem Bahnhof, ist aber noch nicht sonderlich intelligent,
+sondern nimmt den erstbesten, der gefunden wird.
 
-```
+Das ganze ist sehr instabil, aber läuft heute ganz gut.
 
-Am besten einmal auf https://bahnhof.de gehen, den eigenen Bahnhof, die
-gewünschten Zugtypen angeben und sich dann freuen.
-
-Der Zug und das extra wurde hier bewusst getrennt um dann in esphome das eine
-in schwarz und das andere in rot anzeigen zu können ohne zu große Berechnungen
-machen zu müssen.
-
+Zum installieren den Order bahnabfahrtzeiten in den home-assistant
+$config/custom_components/ Ordner kopieren. Auf keinen Fall umbennennen und Home-Assistant
+starten, dann kann man über die UI einen Bahnhof hinzufügen und bekommt die
+nächsten X abfahrten angezeigt.
 
 Ich habe dann noch meinen nächsten Termin, das Wetter und eine TODO-Liste
 integriert.

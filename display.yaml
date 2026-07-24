@@ -9,9 +9,9 @@ logger:
 
 # Enable Home Assistant API
 api:
-  password: !secret ha_api_pw
 
 ota:
+  platform: esphome
   password: !secret ota_pw
 
 wifi:
@@ -37,6 +37,54 @@ binary_sensor:
     id: calendar_all_day
     entity_id: calendar.privat
     attribute: all_day
+  - platform: homeassistant
+    id: train_delayed_0
+    attribute: delayed
+    entity_id: sensor.bahnabfahrtzeiten_empelde_0
+    on_state:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: train_0_canceled
+    attribute: canceled
+    entity_id: sensor.bahnabfahrtzeiten_empelde_0
+    on_state:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: train_delayed_1
+    attribute: delayed
+    entity_id: sensor.bahnabfahrtzeiten_empelde_1
+    on_state:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: train_1_canceled
+    attribute: canceled
+    entity_id: sensor.bahnabfahrtzeiten_empelde_1
+    on_state:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: train_delayed_2
+    attribute: delayed
+    entity_id: sensor.bahnabfahrtzeiten_empelde_2
+    on_state:
+      then:
+        - delay: 2s
+        - component.update: my_display
+  - platform: homeassistant
+    id: train_2_canceled
+    attribute: canceled
+    entity_id: sensor.bahnabfahrtzeiten_empelde_2
+    on_state:
+      then:
+        - delay: 2s
+        - component.update: my_display
 
 text_sensor:
   - platform: homeassistant
@@ -69,58 +117,49 @@ text_sensor:
         - delay: 2s
         - component.update: my_display
   - platform: homeassistant
-    id: next_train
-    entity_id: sensor.nachster_zug
+    id: train_0
+    entity_id: sensor.bahnabfahrtzeiten_empelde_0
     on_value:
       then:
         - delay: 2s
         - component.update: my_display
   - platform: homeassistant
-    id: next_train_extra
-    entity_id: sensor.nachster_zug_extras
+    id: train_1
+    entity_id: sensor.bahnabfahrtzeiten_empelde_1
     on_value:
       then:
         - delay: 2s
         - component.update: my_display
   - platform: homeassistant
-    id: next_next_train
-    entity_id: sensor.ubernachster_zug
+    id: train_2
+    entity_id: sensor.bahnabfahrtzeiten_empelde_2
     on_value:
       then:
         - delay: 2s
         - component.update: my_display
   - platform: homeassistant
-    id: next_next_train_extra
-    entity_id: sensor.ubernachster_zug_extras
-    on_value:
-      then:
-        - delay: 2s
-        - component.update: my_display
+    id: train_delay_0
+    attribute: delayed_time
+    entity_id: sensor.bahnabfahrtzeiten_empelde_0
   - platform: homeassistant
-    id: next_next_next_train
-    entity_id: sensor.drittnachster_zug
-    on_value:
-      then:
-        - delay: 2s
-        - component.update: my_display
+    id: train_delay_1
+    attribute: delayed_time
+    entity_id: sensor.bahnabfahrtzeiten_empelde_1
   - platform: homeassistant
-    id: next_next_next_train_extra
-    entity_id: sensor.drittnachster_zug_extras
-    on_value:
-      then:
-        - delay: 2s
-        - component.update: my_display
+    id: train_delay_2
+    attribute: delayed_time
+    entity_id: sensor.bahnabfahrtzeiten_empelde_2
 
 font:
-  - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
+  - file: '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
     id: train_font
     size: 38
-    glyphs: "!\"/%&()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ"
-  - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
+    glyphs: "!\"/%&()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜß"
+  - file: '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
     id: date_font
     size: 36
-    glyphs: "!\"/%&()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ\U00002192"
-  - file: '/usr/share/fonts/TTF/DejaVuSans.ttf'
+    glyphs: "!\"/%&()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜß\U00002192"
+  - file: '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
     id: wetter_text
     size: 30
     glyphs: "!\"/%&()+=,-_.:°0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzäöüÄÖÜ"
@@ -198,29 +237,33 @@ display:
 
       // BAHNANZEIGE
       it.filled_rectangle(0, 220, 640, 164, white);
-      it.print(20, 220, id(train_font), black, TextAlign::TOP_LEFT, id(next_train).state.c_str());
-      if(id(next_train_extra).state.find("ällt aus") != std::string::npos) {
-        id(train_font).measure(id(next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+      // 50 px per train
+
+      it.print(20, 220, id(train_font), black, TextAlign::TOP_LEFT, id(train_0).state.c_str());
+      if (id(train_0_canceled).state) {
+        id(train_font).measure(id(train_0).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 238, width, 7, red);
-      } else if(!id(next_train_extra).state.empty() && id(next_train).state.rfind(id(next_train_extra).state,0) == std::string::npos) {
+      } else if(id(train_delayed_0).state) {
         it.filled_rectangle(15, 220, 120, 45, red);
-        it.print(20, 220, id(train_font), white, TextAlign::TOP_LEFT, id(next_train_extra).state.c_str());
+        it.print(20, 220, id(train_font), white, TextAlign::TOP_LEFT, id(train_delay_0).state.c_str());
       }
-      it.print(20, 270, id(train_font), black, TextAlign::TOP_LEFT, id(next_next_train).state.c_str());
-      if(id(next_next_train_extra).state.find("ällt aus") != std::string::npos) {
-        id(train_font).measure(id(next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+
+      it.print(20, 270, id(train_font), black, TextAlign::TOP_LEFT, id(train_1).state.c_str());
+      if (id(train_1_canceled).state) {
+        id(train_font).measure(id(train_1).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 288, width, 7, red);
-      } else if(!id(next_next_train_extra).state.empty() && id(next_next_train).state.rfind(id(next_next_train_extra).state,0) == std::string::npos) {
+      } else if(id(train_delayed_1).state) {
         it.filled_rectangle(15, 270, 120, 45, red);
-        it.print(20, 270, id(train_font), white, TextAlign::TOP_LEFT, id(next_next_train_extra).state.c_str());
+        it.print(20, 270, id(train_font), white, TextAlign::TOP_LEFT, id(train_delay_1).state.c_str());
       }
-      it.print(20, 320, id(train_font), black, TextAlign::TOP_LEFT, id(next_next_next_train).state.c_str());
-      if(id(next_next_next_train_extra).state.find("ällt aus") != std::string::npos) {
-        id(train_font).measure(id(next_next_next_train).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
+
+      it.print(20, 320, id(train_font), black, TextAlign::TOP_LEFT, id(train_2).state.c_str());
+      if (id(train_2_canceled).state) {
+        id(train_font).measure(id(train_2).state.c_str(), &width, &throwaway, &throwaway, &throwaway);
         it.filled_rectangle(20, 338, width, 7, red);
-      } else if(!id(next_next_next_train_extra).state.empty() && id(next_next_next_train).state.rfind(id(next_next_next_train_extra).state,0) == std::string::npos) {
+      } else if(id(train_delayed_2).state) {
         it.filled_rectangle(15, 320, 120, 45, red);
-        it.print(20, 320, id(train_font), white, TextAlign::TOP_LEFT, id(next_next_next_train_extra).state.c_str());
+        it.print(20, 320, id(train_font), white, TextAlign::TOP_LEFT, id(train_delay_2).state.c_str());
       }
 
 
